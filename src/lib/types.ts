@@ -121,7 +121,8 @@ export interface LessonBlock {
     | "code"
     | "practice"
     | "visual"
-    | "infographic";
+    | "infographic"
+    | "groq-playground";
   content?: string;
   items?: string[];
   /** For code blocks */
@@ -137,6 +138,8 @@ export interface LessonBlock {
   ideOnly?: boolean;
   /** Named infographic layout for rich lesson visuals */
   infographic?: LessonInfographic;
+  /** Default system prompt for the Groq playground (groq-playground block only) */
+  systemPrompt?: string;
 }
 
 export interface DiagramData {

@@ -37,19 +37,17 @@ export const agenticAiModule4Lessons: Record<string, TopicLesson> = {
   },
   "ai-m4-t3": {
     topicId: "ai-m4-t3",
-    intro: "This topic includes a live chatbot playground powered by the Groq API. Enter your API key and test the chatbot you have been building throughout this module.",
+    intro: "Now test the chatbot you have been building — live, in your browser. Paste your Groq API key on the right, customise the system prompt, choose a model, and start chatting. Your key is never stored on our servers.",
     blocks: [
       {
-        type: "practice",
-        practiceLabel: "Chatbot logic",
-        practicePrompt: "Write the function that will process a user message and return a reply.",
-        starterCode: 'def process_message(user_input: str, history: list, system_prompt: str) -> tuple:\n    """\n    Add user message to history and return the updated history.\n    In your real app, you would call the Groq API here.\n    \n    Returns: (updated_history, assistant_reply)\n    """\n    # Build the full message list\n    messages = [\n        {"role": "system", "content": system_prompt},\n        *history,\n        {"role": "user", "content": user_input}\n    ]\n    \n    # Simulate reply (replace with: client.chat.completions.create(...))\n    reply = f"I understand you asked about: {user_input}"\n    \n    # Update history (keep last 10 turns to avoid context overflow)\n    updated = history + [\n        {"role": "user",      "content": user_input},\n        {"role": "assistant", "content": reply}\n    ]\n    return updated[-20:], reply  # keep last 20 messages\n\nhistory = []\nsystem  = "You are a friendly Python tutor."\n\nhistory, reply = process_message("Hello!", history, system)\nprint(f"Bot: {reply}")\nhistory, reply = process_message("What is recursion?", history, system)\nprint(f"Bot: {reply}")\nprint(f"\\nHistory length: {len(history)} messages")',
+        type: "groq-playground",
+        systemPrompt: "You are a helpful Python and AI tutor. Answer clearly and concisely, using short code examples where useful.",
       },
     ],
     keyTakeaways: [
-      "Test your system prompt thoroughly — it shapes every response the bot gives.",
-      "Limit history length (e.g. last 20 messages) to stay within the context window.",
-      "The playground on the right uses your real Groq API key — your key, your usage.",
+      "The system prompt shapes every response — try changing it and see the difference.",
+      "Your Groq API key is sent directly from your browser to our server-side proxy, then to Groq. It is never logged or stored.",
+      "LLaMA 3 70B gives the best answers; LLaMA 3 8B is fastest for quick tests.",
     ],
   },
   "ai-m4-t4": {
