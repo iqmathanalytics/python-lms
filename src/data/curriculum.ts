@@ -1,15 +1,17 @@
-import type { Module } from "@/lib/types";
+import type { Module, CourseId } from "@/lib/types";
+import { agenticAiModules } from "./agentic-ai-curriculum";
 
 export const PLATFORM_NAME = "Introduction to Python";
 export const PLATFORM_LOGO = "/logo/nexperts-logo.png";
 export const PLATFORM_TAGLINE =
   "Structured Python lessons with visuals and hands-on practice — built for future Data Science.";
 
-export const modules: Module[] = [
+const pythonModules: Module[] = [
   {
     id: 1,
     name: "Python Introduction and Setting up the Environment",
     slug: "introduction-and-setup",
+    course: "python",
     description:
       "What is programming, why Python, and how to set up your development environment.",
     icon: "🐣",
@@ -59,6 +61,7 @@ export const modules: Module[] = [
     slug: "basic-syntax-and-data-types",
     description: "Your first lines of Python: print, variables, and data types.",
     icon: "✏️",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m2-t1", title: "Input and Output", slug: "input-output", description: "print() and input().", estimatedMinutes: 10, published: true, videoUrl: "LQ4KVY0wYB4" },
@@ -74,6 +77,7 @@ export const modules: Module[] = [
     slug: "operators",
     description: "Math and logic symbols Python understands.",
     icon: "➕",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m3-t1", title: "Arithmetic Operators", slug: "arithmetic", description: "+, -, *, /, and more.", estimatedMinutes: 10, published: true, videoUrl: "hNrv_VfBQy0" },
@@ -91,6 +95,7 @@ export const modules: Module[] = [
     slug: "strings",
     description: "Text data: create, slice, and format strings.",
     icon: "🔤",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m4-t1", title: "Creating Strings", slug: "creating-strings", description: "Quotes and multiline text.", estimatedMinutes: 8, published: true, videoUrl: "cGA3M5vGfh4" },
@@ -106,6 +111,7 @@ export const modules: Module[] = [
     slug: "lists",
     description: "Ordered, changeable collections.",
     icon: "📋",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m5-t1", title: "Creating Lists", slug: "creating-lists", description: "Square brackets [].", estimatedMinutes: 8, published: true, videoUrl: "s7yYUi1V-Is" },
@@ -122,6 +128,7 @@ export const modules: Module[] = [
     slug: "tuples",
     description: "Ordered, unchangeable collections.",
     icon: "📦",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m6-t1", title: "Tuple Syntax", slug: "syntax", description: "Parentheses ().", estimatedMinutes: 8, published: true },
@@ -137,6 +144,7 @@ export const modules: Module[] = [
     slug: "sets",
     description: "Unique unordered collections.",
     icon: "🎯",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m7-t1", title: "Set Syntax", slug: "syntax", description: "Curly braces or set().", estimatedMinutes: 8, published: true },
@@ -151,6 +159,7 @@ export const modules: Module[] = [
     slug: "dictionaries",
     description: "Key-value pairs — like a real dictionary.",
     icon: "📖",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m8-t1", title: "Dictionary Syntax", slug: "syntax", description: "{key: value}.", estimatedMinutes: 8, published: true },
@@ -165,6 +174,7 @@ export const modules: Module[] = [
     slug: "conditionals",
     description: "Make decisions with if / elif / else.",
     icon: "🔀",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m9-t1", title: "if Statement", slug: "if", description: "Run code only when true.", estimatedMinutes: 10, published: true },
@@ -178,6 +188,7 @@ export const modules: Module[] = [
     slug: "loops",
     description: "Repeat work with while and for.",
     icon: "🔁",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m10-t1", title: "while Loop", slug: "while", description: "Repeat while condition is true.", estimatedMinutes: 10, published: true },
@@ -193,6 +204,7 @@ export const modules: Module[] = [
     slug: "comprehensions",
     description: "Short, powerful ways to build lists and dicts.",
     icon: "⚡",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m11-t1", title: "List Comprehension Syntax", slug: "list-comprehension", description: "One-line list building.", estimatedMinutes: 12, published: true },
@@ -206,6 +218,7 @@ export const modules: Module[] = [
     slug: "functions",
     description: "Reusable blocks of code.",
     icon: "🧩",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m12-t1", title: "Creating Functions", slug: "creating", description: "def my_function():", estimatedMinutes: 10, published: true },
@@ -221,12 +234,24 @@ export const modules: Module[] = [
     slug: "lambda",
     description: "Small one-line functions with lambda.",
     icon: "👻",
+    course: "python",
     phase: "foundations",
     topics: [
       { id: "m13-t1", title: "Lambda Functions", slug: "lambda-functions", description: "lambda x: x * 2", estimatedMinutes: 10, published: true },
     ],
   },
 ];
+
+/** All modules across all courses — the single source of truth for routing. */
+export const modules: Module[] = [...pythonModules, ...agenticAiModules];
+
+// ── Course-aware helpers ───────────────────────────────────────────────────────
+
+export function getModulesByCourse(courseId: CourseId): Module[] {
+  return modules.filter((m) => m.course === courseId);
+}
+
+// ── Generic helpers ────────────────────────────────────────────────────────────
 
 export function getModuleBySlug(slug: string): Module | undefined {
   return modules.find((m) => m.slug === slug);
@@ -257,9 +282,10 @@ export function getPublishedTopicCount() {
   );
 }
 
-/** Flat list of published topics in curriculum order (for prev/next navigation). */
-export function getPublishedTopicPath() {
-  return modules.flatMap((m) =>
+/** Flat list of published topics in course order (for prev/next navigation within a course). */
+export function getPublishedTopicPath(courseId?: CourseId) {
+  const source = courseId ? getModulesByCourse(courseId) : modules;
+  return source.flatMap((m) =>
     m.topics
       .filter((t) => t.published)
       .map((topic) => ({ module: m, topic }))
@@ -267,7 +293,9 @@ export function getPublishedTopicPath() {
 }
 
 export function getAdjacentPublishedTopics(moduleSlug: string, topicSlug: string) {
-  const path = getPublishedTopicPath();
+  const mod = getModuleBySlug(moduleSlug);
+  // Navigate only within the same course so Python prev/next never bleeds into AI topics
+  const path = getPublishedTopicPath(mod?.course);
   const i = path.findIndex(
     (p) => p.module.slug === moduleSlug && p.topic.slug === topicSlug
   );

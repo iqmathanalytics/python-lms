@@ -1,5 +1,19 @@
 export type TopicStatus = "not_started" | "in_progress" | "completed";
 
+export type CourseId = "python" | "agentic-ai";
+
+export interface Course {
+  id: CourseId;
+  name: string;
+  slug: string;
+  tagline: string;
+  description: string;
+  icon: string;
+  level: "beginner" | "intermediate" | "advanced";
+  /** Tailwind color token used for theming course cards/badges */
+  color: string;
+}
+
 export interface Topic {
   id: string;
   title: string;
@@ -19,8 +33,9 @@ export interface Module {
   description: string;
   icon: string;
   topics: Topic[];
-  /** Data science track phase */
-  phase: "foundations" | "data-science";
+  course: CourseId;
+  /** Track phase within the course */
+  phase: string;
 }
 
 export interface QuizQuestion {

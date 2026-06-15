@@ -1,28 +1,57 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { modules, getPublishedTopicCount } from "@/data/curriculum";
+import { getModulesByCourse, getPublishedTopicCount } from "@/data/curriculum";
+import { courses } from "@/data/courses";
 import { getTotalPracticeCount } from "@/data/practice/meta";
 import { PAGE_CONTAINER } from "@/lib/layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/contexts/ProgressContext";
 import { getSupabase } from "@/lib/supabase/client";
 import { useEntitlements } from "@/hooks/useEntitlements";
+import type { CourseId } from "@/lib/types";
 import { BookOpen, Terminal, CheckCircle2, Lock, Loader2 } from "lucide-react";
 import { DashboardRoadmap } from "@/components/dashboard/DashboardRoadmap";
 import { TourTrigger } from "@/components/walkthrough/TourTrigger";
+
+const COURSE_STORAGE_KEY = "last-active-course";
 
 export default function DashboardPage() {
   const { user, profile } = useAuth();
   const { progress, ready } = useProgress();
   const { hasPremium } = useEntitlements();
   const [practiceSolved, setPracticeSolved] = useState(0);
+  const [activeCourse, setActiveCourse] = useState<CourseId>("python");
 
+  // Restore last active course from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(COURSE_STORAGE_KEY) as CourseId | null;
+      if (saved && courses.some((c) => c.id === saved)) setActiveCourse(saved);
+    } catch { /* ignore */ }
+  }, []);
+
+  const switchCourse = (id: CourseId) => {
+    setActiveCourse(id);
+    try { localStorage.setItem(COURSE_STORAGE_KEY, id); } catch { /* ignore */ }
+  };
+
+  const courseModules = getModulesByCourse(activeCourse);
   const totalTopics = getPublishedTopicCount();
   const totalPractice = getTotalPracticeCount();
 
-  const lessonCompleted = progress.completedTopics.length;
-  const scores = Object.values(progress.quizScores);
+  // Stats scoped to the active course topics
+  const courseTopicIds = new Set(
+    courseModules.flatMap((m) => m.topics.map((t) => t.id))
+  );
+  const lessonCompleted = progress.completedTopics.filter((id) => courseTopicIds.has(id)).length;
+  const courseTotal = courseModules.reduce(
+    (acc, m) => acc + m.topics.filter((t) => t.published).length,
+    0
+  );
+  const scores = Object.entries(progress.quizScores)
+    .filter(([id]) => courseTopicIds.has(id))
+    .map(([, v]) => v);
   const quizAvg = scores.length
     ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
     : 0;
@@ -31,7 +60,6 @@ export default function DashboardPage() {
     if (!user) return;
     const sb = getSupabase();
     if (!sb) return;
-
     const { data: rows } = await sb
       .from("practice_progress")
       .select("problem_id")
@@ -41,15 +69,11 @@ export default function DashboardPage() {
   }, [user]);
 
   useEffect(() => {
-    if (ready && user) {
-      void loadPracticeStats();
-    }
+    if (ready && user) void loadPracticeStats();
   }, [ready, user, loadPracticeStats]);
 
   useEffect(() => {
-    const onUpdate = () => {
-      void loadPracticeStats();
-    };
+    const onUpdate = () => { void loadPracticeStats(); };
     window.addEventListener("pypath-progress-updated", onUpdate);
     return () => window.removeEventListener("pypath-progress-updated", onUpdate);
   }, [loadPracticeStats]);
@@ -58,14 +82,33 @@ export default function DashboardPage() {
 
   return (
     <div className={`${PAGE_CONTAINER} py-10`}>
-      {/* Reads ?tour=1 param set by register page and fires the walkthrough */}
       <Suspense fallback={null}>
         <TourTrigger />
       </Suspense>
+
       <h1 className="text-3xl font-bold text-gray-900">Your progress</h1>
       <p className="mt-2 text-gray-600">
         Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}.
       </p>
+
+      {/* Course switcher tabs */}
+      <div className="mt-6 flex gap-2 flex-wrap">
+        {courses.map((course) => (
+          <button
+            key={course.id}
+            type="button"
+            onClick={() => switchCourse(course.id)}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+              activeCourse === course.id
+                ? "bg-brand-600 text-white shadow-sm"
+                : "border border-gray-200 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-700"
+            }`}
+          >
+            <span>{course.icon}</span>
+            {course.name}
+          </button>
+        ))}
+      </div>
 
       {loading ? (
         <div className="mt-12 flex justify-center">
@@ -77,7 +120,7 @@ export default function DashboardPage() {
             <StatCard
               icon={BookOpen}
               label="Lessons completed"
-              value={`${lessonCompleted} / ${totalTopics}`}
+              value={`${lessonCompleted} / ${courseTotal}`}
             />
             <StatCard
               icon={Terminal}
@@ -98,7 +141,6 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-10">
-            {/* Target only the heading so the spotlight doesn't cover all modules */}
             <div data-walkthrough="dashboard-roadmap" className="scroll-mt-24">
               <h2 className="text-lg font-semibold text-gray-900">Learning Roadmap</h2>
               <p className="mt-1 text-sm text-gray-500">
@@ -106,11 +148,10 @@ export default function DashboardPage() {
               </p>
             </div>
             <DashboardRoadmap
-              modules={modules}
+              modules={courseModules}
               completedTopicIds={progress.completedTopics}
             />
           </div>
-
         </>
       )}
     </div>

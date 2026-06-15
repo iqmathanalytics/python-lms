@@ -40,7 +40,7 @@ export function HomeRoadmap({ modules }: HomeRoadmapProps) {
             const firstTopic = m.topics.find((t) => t.published);
             return (
               <Link
-                key={m.id}
+                key={m.slug}
                 href={
                   firstTopic
                     ? `/learn/${m.slug}/${firstTopic.slug}`
@@ -78,7 +78,7 @@ export function HomeRoadmap({ modules }: HomeRoadmapProps) {
               <p className="text-sm font-semibold text-gray-700">Coming next</p>
               <ul className="mt-3 space-y-2 text-sm text-gray-500">
                 {upcoming.slice(0, 4).map((m) => (
-                  <li key={m.id} className="flex items-center gap-2">
+                  <li key={m.slug} className="flex items-center gap-2">
                     <span>{m.icon}</span>
                     <span className="line-clamp-1">
                       {m.id}. {m.name}

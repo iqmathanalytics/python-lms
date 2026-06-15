@@ -1,11 +1,12 @@
-import { modules, getPublishedTopicCount } from "@/data/curriculum";
+import { getModulesByCourse, getPublishedTopicCount } from "@/data/curriculum";
 import { HomeHero } from "./HomeHero";
 import { HomeFeatures } from "./HomeFeatures";
 import { HomeRoadmap } from "./HomeRoadmap";
 import { HomeCTA } from "./HomeCTA";
 
 export default function HomePage() {
-  const liveModules = modules.filter((m) =>
+  const pythonModules = getModulesByCourse("python");
+  const liveModules = pythonModules.filter((m) =>
     m.topics.some((t) => t.published)
   ).length;
   const liveTopics = getPublishedTopicCount();
@@ -15,10 +16,10 @@ export default function HomePage() {
       <HomeHero
         liveModules={liveModules}
         liveTopics={liveTopics}
-        totalModules={modules.length}
+        totalModules={pythonModules.length}
       />
       <HomeFeatures />
-      <HomeRoadmap modules={modules} />
+      <HomeRoadmap modules={pythonModules} />
       <HomeCTA />
     </div>
   );

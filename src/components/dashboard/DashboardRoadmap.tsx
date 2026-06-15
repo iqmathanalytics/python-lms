@@ -211,7 +211,7 @@ export function DashboardRoadmap({ modules, completedTopicIds }: DashboardRoadma
     <div className="relative mt-4">
       {modules.map((m, i) => (
         <ModuleNode
-          key={m.id}
+          key={m.slug}
           module={m}
           completedTopicIds={completedTopicIds}
           defaultOpen={i === 0}

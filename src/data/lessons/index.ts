@@ -12,6 +12,12 @@ import { module10Lessons } from "./module-10";
 import { module11Lessons } from "./module-11";
 import { module12Lessons } from "./module-12";
 import { module13Lessons } from "./module-13";
+import { agenticAiModule1Lessons } from "./agentic-ai-module-1";
+import { agenticAiModule2Lessons } from "./agentic-ai-module-2";
+import { agenticAiModule3Lessons } from "./agentic-ai-module-3";
+import { agenticAiModule4Lessons } from "./agentic-ai-module-4";
+import { agenticAiModule5Lessons } from "./agentic-ai-module-5";
+import { agenticAiModule6Lessons } from "./agentic-ai-module-6";
 
 const allLessons: Record<string, TopicLesson> = {
   ...module1Lessons,
@@ -27,6 +33,12 @@ const allLessons: Record<string, TopicLesson> = {
   ...module11Lessons,
   ...module12Lessons,
   ...module13Lessons,
+  ...agenticAiModule1Lessons,
+  ...agenticAiModule2Lessons,
+  ...agenticAiModule3Lessons,
+  ...agenticAiModule4Lessons,
+  ...agenticAiModule5Lessons,
+  ...agenticAiModule6Lessons,
 };
 
 export function getLesson(topicId: string): TopicLesson | undefined {
